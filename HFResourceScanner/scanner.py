@@ -325,18 +325,18 @@ class Scanner(TrainerCallback):
         if isinstance(model, peft.PeftModel):
             self.metadata["peft_trainable_params"] = model.get_nb_trainable_parameters()
 
-        optimizer_mem = 0
-        for lay in optimizer.state.items():
-            lstate = lay[1]
-            for v in lstate.values():
-                if isinstance(v, torch.Tensor):
-                    optimizer_mem += v.nelement() * v.element_size()
-        self.mem_data["optimizer"] = optimizer_mem
+        # optimizer_mem = 0
+        # for lay in optimizer.state.items():
+        #     lstate = lay[1]
+        #     for v in lstate.values():
+        #         if isinstance(v, torch.Tensor):
+        #             optimizer_mem += v.nelement() * v.element_size()
+        # self.mem_data["optimizer"] = optimizer_mem
 
         # we cannot calculate gradients from here
         # it will happen in the optimizer step hook
         # update activation value to remove out the model params + optimizer
-        self.mem_data["activation"] -= self.mem_data["model"] + self.mem_data["optimizer"]
+        self.mem_data["activation"] -= self.mem_data["model"] + 0
 
         # optional clean up step in presenting data
         from .utils import fmt_size

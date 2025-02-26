@@ -249,9 +249,13 @@ class Scanner(TrainerCallback):
         
         self.bwd_begin_hook_handle = model.lm_head.register_full_backward_pre_hook(bwd_begin)
         self.bwd_end_hook_handle = first_learnable_param.register_hook(bwd_end)
-    
-        self.opt_step_begin_hook_handle = optimizer.register_step_pre_hook(opt_step_begin)
-        self.opt_step_end_hook_handle = optimizer.register_step_post_hook(opt_step_end)
+
+        if optimizer:
+            self.opt_step_begin_hook_handle = optimizer.register_step_pre_hook(opt_step_begin)
+            self.opt_step_end_hook_handle = optimizer.register_step_post_hook(opt_step_end)
+        else:
+            self.opt_step_begin_hook_handle = None
+            self.opt_step_end_hook_handle = None
 
         ##############
         # NOTE: This is not ideal, but is it factually correct as a hack?
@@ -346,8 +350,10 @@ class Scanner(TrainerCallback):
         self.fwd_end_hook_handle.remove()
         self.bwd_begin_hook_handle.remove()
         self.bwd_end_hook_handle.remove()
-        self.opt_step_begin_hook_handle.remove()
-        self.opt_step_end_hook_handle.remove()
+        if self.opt_step_begin_hook_handle:
+            self.opt_step_begin_hook_handle.remove()
+        if self.opt_step_end_hook_handle:
+            self.opt_step_end_hook_handle.remove()
 
     def write_plain(self, fout=sys.stdout):
         print("ResourceScanner Memory Data: ", self.mem_data, file=fout)
